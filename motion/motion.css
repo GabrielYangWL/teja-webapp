@@ -52,6 +52,37 @@ a, button {
 /* View changes inside checkout steps */
 .m-enter { animation: m-fade-up .8s var(--m-ease) both; }
 
+/* Splash: "Welcome to téja", then lifts like a curtain to reveal the page */
+.m-splash {
+  position: fixed; inset: 0; z-index: 1000;
+  background: #F5F5F2; color: #272A28;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  clip-path: inset(0 0 0 0);
+  transition: clip-path 1.1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.m-splash-welcome {
+  font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.32em; text-transform: uppercase;
+  padding-left: 0.32em; /* balance trailing letter-spacing */
+  animation: m-fade-up 1s var(--m-ease) .2s both;
+}
+.m-splash-logo { height: 44px; width: auto; display: block; animation: m-logo-in 1.4s var(--m-ease) .4s both; }
+.m-splash-line { width: 96px; height: 1px; background: #BFC2BE; overflow: hidden; animation: m-fade .6s ease .5s both; }
+.m-splash-line::after {
+  content: ""; display: block; height: 100%; background: #272A28;
+  transform-origin: left; animation: m-draw 1.6s var(--m-ease) .6s both;
+}
+.m-splash > * { transition: opacity .5s var(--m-ease-soft), transform .7s var(--m-ease); }
+.m-splash.m-out > * { opacity: 0; transform: translate3d(0, -14px, 0); }
+.m-splash.m-lift { clip-path: inset(0 0 100% 0); }
+html.m-splash-on { overflow: hidden; }
+/* Hold the hero intro until the curtain lifts */
+.m-splash-on .m-hero * { animation-play-state: paused !important; }
+
+@keyframes m-logo-in {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes m-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes m-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes m-fade-up { from { opacity: 0; transform: translate3d(0, 20px, 0); } to { opacity: 1; transform: none; } }
 @keyframes m-rise-mask {

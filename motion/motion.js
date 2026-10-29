@@ -4,10 +4,40 @@
 (function () {
   if (window.__tejaMotion) return;
   window.__tejaMotion = true;
-  if (!('IntersectionObserver' in window) || !('MutationObserver' in window)) return;
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
   var root = document.documentElement;
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Splash: "Welcome to téja". Attached to <html>, outside <body>, so React renders never touch it.
+  // The logo src placeholder is replaced with the header logo's src by scripts/apply-motion.js.
+  (function splash() {
+    var start = Date.now(), MIN = reduce ? 900 : 2100, MAX = 5000, done = false;
+    var el = document.createElement('div');
+    el.className = 'm-splash';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-label', 'Welcome to téja');
+    el.innerHTML = '<span class="m-splash-welcome">Welcome to</span>' +
+      '<img class="m-splash-logo" alt="téja" src="__TEJA_LOGO__"><span class="m-splash-line"></span>';
+    root.appendChild(el);
+    root.classList.add('m-splash-on');
+
+    function dismiss() {
+      if (done) return;
+      done = true;
+      el.classList.add('m-out');
+      setTimeout(function () {
+        el.classList.add('m-lift');
+        root.classList.remove('m-splash-on'); // hero intro plays as the curtain rises
+      }, reduce ? 0 : 450);
+      setTimeout(function () { el.remove(); }, reduce ? 50 : 1700);
+    }
+    function ready() { setTimeout(dismiss, Math.max(0, MIN - (Date.now() - start))); }
+    if (document.readyState === 'complete') ready();
+    else window.addEventListener('load', ready);
+    setTimeout(dismiss, MAX);
+  })();
+
+  if (!('IntersectionObserver' in window) || !('MutationObserver' in window)) return;
+  if (reduce) return;
   var STAGGER = 0.08, MAX_STAGGER = 6;
 
   var io = new IntersectionObserver(function (entries) {

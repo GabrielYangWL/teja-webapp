@@ -16,7 +16,21 @@ function inject(html) {
   if (s >= 0) html = html.slice(0, s) + html.slice(html.indexOf(END, s) + END.length + 1);
   const head = html.indexOf('</head>');
   if (head < 0) throw new Error('no </head> found');
-  return html.slice(0, head) + block + html.slice(head);
+  // Splash uses the header logo; in the bundle its src is an asset id the unpacker swaps for a blob URL
+  const logo = html.match(/aria-label="téja home"[^>]*><img src="([^"]+)"/);
+  if (!logo) throw new Error('header logo not found');
+  return html.slice(0, head) + block.replaceAll('__TEJA_LOGO__', logo[1]) + html.slice(head);
+}
+
+// The bundle's own unpacking screen: plain cream so it hands off seamlessly to the splash
+const THUMB_RE = /<div id="__bundler_thumbnail">[\s\S]*?<\/div>/;
+const OUTER_CSS = `${START}<style>#__bundler_thumbnail{background:#F5F5F2}#__bundler_loading{display:none}</style>${END}`;
+function patchOuter(src) {
+  src = src.replace(THUMB_RE, '<div id="__bundler_thumbnail"></div>');
+  const s = src.indexOf(START);
+  if (s >= 0 && s < src.indexOf('</head>')) src = src.slice(0, s) + src.slice(src.indexOf(END, s) + END.length);
+  const head = src.indexOf('</head>');
+  return src.slice(0, head) + OUTER_CSS + src.slice(head);
 }
 
 const TPL_OPEN = '<script type="__bundler/template">';
@@ -34,7 +48,7 @@ for (const f of files) {
     const tpl = inject(JSON.parse(src.slice(a, b)));
     // Escape '<' so nothing in the template can close or confuse the outer <script>
     const json = JSON.stringify(tpl).replace(/</g, '\\u003c');
-    out = src.slice(0, a) + '\n' + json + '\n  ' + src.slice(b);
+    out = patchOuter(src.slice(0, a)) + '\n' + json + '\n  ' + src.slice(b);
   } else {
     out = inject(src);
   }

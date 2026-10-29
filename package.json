@@ -1,0 +1,16 @@
+{
+  "name": "teja-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "téja static site",
+  "scripts": {
+    "serve": "node tests/serve.js",
+    "apply-motion": "node scripts/apply-motion.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1"
+  }
+}
