@@ -52,6 +52,21 @@ a, button {
 /* View changes inside checkout steps */
 .m-enter { animation: m-fade-up .8s var(--m-ease) both; }
 
+/* Announcement bar on small screens: one slim line, messages cross-fade in turn (motion.js rotates .m-active).
+   !important is needed to override the bar's inline flex layout. */
+@media (max-width: 760px) {
+  .m-announce {
+    display: block !important; position: relative; height: 34px; padding: 0 16px !important; overflow: hidden;
+  }
+  .m-announce > * {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 0 16px; white-space: nowrap; text-align: center;
+    opacity: 0; transform: translate3d(0, 8px, 0);
+    transition: opacity .7s var(--m-ease-soft), transform .9s var(--m-ease);
+  }
+  .m-announce > .m-active { opacity: 1; transform: none; }
+}
+
 /* Splash: "Welcome to téja", then lifts like a curtain to reveal the page */
 .m-splash {
   position: fixed; inset: 0; z-index: 1000;

@@ -48,6 +48,25 @@ test.describe('front-end quality', () => {
     }
   });
 
+  test('announcement bar stays on one line and rotates on small screens', async ({ page }) => {
+    await openSite(page);
+    const bar = page.locator('header').locator('xpath=preceding-sibling::div[1]');
+    const messages = bar.locator(':scope > span');
+    await expect(messages).toHaveCount(3);
+
+    const box = await bar.boundingBox();
+    if ((page.viewportSize()?.width ?? 0) > 760) {
+      // Desktop: all three messages visible side by side
+      for (let i = 0; i < 3; i++) await expect(messages.nth(i)).toBeVisible();
+      expect(box.height).toBeLessThan(40);
+      return;
+    }
+    expect(box.height, 'bar is a single slim line').toBeLessThanOrEqual(36);
+    const visible = () => messages.evaluateAll((els) => els.filter((e) => getComputedStyle(e).opacity === '1').map((e) => e.textContent));
+    await expect.poll(visible).toEqual(['Free UK delivery over £150']);
+    await expect.poll(visible, { timeout: 8_000 }).toEqual(['Handmade in Bali · 925 sterling silver']);
+  });
+
   test('every image has alt text', async ({ page }) => {
     await openSite(page);
     const missingAlt = await page.locator('img:not([alt])').count();

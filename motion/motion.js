@@ -36,6 +36,30 @@
     setTimeout(dismiss, MAX);
   })();
 
+  // Announcement bar: on small screens motion.css stacks its messages in one line and shows .m-active.
+  // Runs even with reduced motion (the swap is then instant), so the bar never wraps to three lines.
+  (function announceBar() {
+    var timer = null;
+    function setup() {
+      var header = document.querySelector('header');
+      var bar = header && header.previousElementSibling;
+      if (!bar || bar.__mAnnounce || bar.children.length < 2) return;
+      bar.__mAnnounce = true;
+      bar.classList.add('m-announce');
+      var items = bar.children, i = 0;
+      items[0].classList.add('m-active');
+      clearInterval(timer);
+      timer = setInterval(function () {
+        if (!bar.isConnected) { clearInterval(timer); return; }
+        items[i].classList.remove('m-active');
+        i = (i + 1) % items.length;
+        items[i].classList.add('m-active');
+      }, 3500);
+    }
+    if ('MutationObserver' in window) new MutationObserver(setup).observe(root, { childList: true, subtree: true });
+    setup();
+  })();
+
   if (!('IntersectionObserver' in window) || !('MutationObserver' in window)) return;
   if (reduce) return;
   var STAGGER = 0.08, MAX_STAGGER = 6;
